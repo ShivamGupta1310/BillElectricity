@@ -11,31 +11,11 @@ import {
   View,
   TouchableOpacity
 } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
 import { horizontalScale, verticalScale, moderateScale } from '../../utilies/utilies';
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 //@ts-ignore
 import CheckBox from 'react-native-check-box';
 //@ts-ignore
 import { Table, Row, Rows } from 'react-native-table-component';
-
-const data = [
-  { label: 'Item 1', value: '1' },
-  { label: 'Item 2', value: '2' },
-  { label: 'Item 3', value: '3' },
-  { label: 'Item 4', value: '4' },
-  { label: 'Item 5', value: '5' },
-  { label: 'Item 6', value: '6' },
-  { label: 'Item 7', value: '7' },
-  { label: 'Item 8', value: '8' },
-];
-
 
 function Home(): JSX.Element {
   const [showTable, setShowTable] = useState(false);
@@ -93,7 +73,6 @@ function Home(): JSX.Element {
     const thirdDiffUnit = third.perviousUnit - third.currentUnit;
     const secondDiffUnit = second.perviousUnit - second.currentUnit;
     const motorDiffUnit = motor.perviousUnit - motor.currentUnit;
-    console.log("perMotor", secondDiffUnit, (motorDiffUnit / perMotor), Number(secondDiffUnit + (motorDiffUnit / perMotor).toFixed(2)));
     if (thirdDiffUnit > 0) {
       perMotor = perMotor + 1
     }
@@ -161,8 +140,6 @@ function Home(): JSX.Element {
   }
 
   const handleFirstCalculate = () => {
-    console.log("third", third);
-    console.log("second", second);
     const unitUsed = total.unit - (third.totalUnit + second.totalUnit);
     const totalBill = unitUsed * per.unit;
     const totalBillAmount = total.bill - (Number(third.totalAmountDrink.toFixed(2)) + Number(second.totalAmountDrink.toFixed(2)));
@@ -231,7 +208,6 @@ function Home(): JSX.Element {
             keyboardType='numeric'
             onChangeText={(val) => value = val}
             onEndEditing={() => {
-              console.log("value", value);
               setThird(settotal => ({
                 ...settotal,
                 perviousUnit: Number(value),
@@ -322,21 +298,6 @@ function Home(): JSX.Element {
             <Text style={styles.errorRow}>Pervious Unit greather than Current Unit on Motor floor</Text>
           }
         </View>
-        {/* <View style={styles.totalRow}>
-          <Text style={{flex: 0.3}}>Motor Unit:</Text>
-          <View style={{flex:0.9}}>
-          <Dropdown
-              placeholder="Select Motor divided by"
-              labelField="label"
-              valueField="value"
-              data={data}
-              onChange={item => {
-  
-              }}
-            />
-          </View>
-       
-        </View> */}
       </View>
     )
   }
@@ -496,7 +457,7 @@ function Home(): JSX.Element {
             ]} textStyle={styles.text} />
             <Row data={[``, `Motor Unit: ${per.motor}`]} style={styles.head} textStyle={styles.text} />
             <Row data={[``, `Per Unit : ${per.unit}`]} style={styles.head} textStyle={styles.text} />
-            <Row data={[``, `TotalBill : ${handleFirstCalculate().totalBillAmount + second.totalAmountDrink.toFixed(2) + third.totalAmountDrink.toFixed(2)}`]} style={styles.head} textStyle={styles.text} />
+            <Row data={[``, `TotalBill : ${Math.floor(Number(handleFirstCalculate().totalBillAmount)) + Math.floor(second.totalAmountDrink)+ Math.floor(third.totalAmountDrink)}`]} style={styles.head} textStyle={styles.text} />
           </Table>
         )}
       </ScrollView>
