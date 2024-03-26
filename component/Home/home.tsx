@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import type { PropsWithChildren } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -9,16 +8,20 @@ import {
   TextInput,
   useColorScheme,
   View,
-  TouchableOpacity
+  TouchableOpacity,
+  Alert,
+  Button
 } from 'react-native';
-import { horizontalScale, verticalScale, moderateScale } from '../../utilies/utilies';
 //@ts-ignore
 import CheckBox from 'react-native-check-box';
 //@ts-ignore
 import { Table, Row, Rows } from 'react-native-table-component';
+import PDFBill from '../pdfBill';
+import { horizontalScale, verticalScale, moderateScale } from '../../utilies/utilies';
 
-function Home(): JSX.Element {
+const Home = ({ navigation }) => {
   const [showTable, setShowTable] = useState(false);
+  const [path, setPath] = useState('');
   const [firstInclude, setFirstInclude] = useState(true);
   const [showFirst, setShowFirst] = useState(false);
   const [total, setTotal] = useState({
@@ -399,6 +402,9 @@ function Home(): JSX.Element {
     )
   }
 
+  const generatePDF = () => {
+    return <PDFBill />
+  }
   return (
     <SafeAreaView style={styles.mainContainer}>
       <StatusBar
@@ -448,19 +454,26 @@ function Home(): JSX.Element {
           leftTextStyle={styles.checkIcon}
         />
         {showTable && (
-          <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
-            <Row data={['', 'Unit used', 'TotalUnit', 'Total Bill', 'Drinking Pay', `Total Pay`]} style={styles.head} textStyle={styles.text} />
-            <Rows data={[
-              ['Third', `${third.perviousUnit - third.currentUnit}`, `${third.totalUnit.toFixed(2)}`, `${third.totalAmount}`, `${third.otherFlag === 0 ? '+' : third.otherFlag === 1 ? '-' : ''} ${third.otherAmount.toFixed(2)}`, `${third.totalAmountDrink.toFixed(2)}`],
-              ['Second', `${second.perviousUnit - second.currentUnit}`, `${second.totalUnit.toFixed(2)}`, `${second.totalAmount}`, `${second.otherFlag === 0 ? '+' : second.otherFlag === 1 ? '-' : ''} ${second.otherAmount.toFixed(2)}`, `${second.totalAmountDrink.toFixed(2)}`],
-              showFirst && ['First', ``, `${handleFirstCalculate().unitUsed}`, `${handleFirstCalculate().totalBill}`, `${((third.otherAmount - second.otherAmount).toFixed(2))}`, `${handleFirstCalculate().totalBillAmount}`],
-            ]} textStyle={styles.text} />
-            <Row data={[``, `Motor Unit: ${per.motor}`]} style={styles.head} textStyle={styles.text} />
-            <Row data={[``, `Per Unit : ${per.unit}`]} style={styles.head} textStyle={styles.text} />
-            <Row data={[``, `TotalBill : ${Math.floor(Number(handleFirstCalculate().totalBillAmount)) + Math.floor(second.totalAmountDrink)+ Math.floor(third.totalAmountDrink)}`]} style={styles.head} textStyle={styles.text} />
-          </Table>
+          <>
+            <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
+              <Row data={['', 'Unit used', 'TotalUnit', 'Total Bill', 'Drinking Pay', `Total Pay`]} style={styles.head} textStyle={styles.text} />
+              <Rows data={[
+                ['Third', `${third.perviousUnit - third.currentUnit}`, `${third.totalUnit.toFixed(2)}`, `${third.totalAmount}`, `${third.otherFlag === 0 ? '+' : third.otherFlag === 1 ? '-' : ''} ${third.otherAmount.toFixed(2)}`, `${third.totalAmountDrink.toFixed(2)}`],
+                ['Second', `${second.perviousUnit - second.currentUnit}`, `${second.totalUnit.toFixed(2)}`, `${second.totalAmount}`, `${second.otherFlag === 0 ? '+' : second.otherFlag === 1 ? '-' : ''} ${second.otherAmount.toFixed(2)}`, `${second.totalAmountDrink.toFixed(2)}`],
+                showFirst && ['First', ``, `${handleFirstCalculate().unitUsed}`, `${handleFirstCalculate().totalBill}`, `${((third.otherAmount - second.otherAmount).toFixed(2))}`, `${handleFirstCalculate().totalBillAmount}`],
+              ]} textStyle={styles.text} />
+              <Row data={[``, `Motor Unit: ${per.motor}`]} style={styles.head} textStyle={styles.text} />
+              <Row data={[``, `Per Unit : ${per.unit}`]} style={styles.head} textStyle={styles.text} />
+              <Row data={[``, `TotalBill : ${Math.floor(Number(handleFirstCalculate().totalBillAmount)) + Math.floor(second.totalAmountDrink) + Math.floor(third.totalAmountDrink)}`]} style={styles.head} textStyle={styles.text} />
+            </Table>
+            <TouchableOpacity style={styles.pdfContainer} onPress={() => navigation.navigate('Bill')}>
+              <Text style={{ color: "white" }}>PDF</Text>
+            </TouchableOpacity>
+          </>
         )}
+
       </ScrollView>
+
     </SafeAreaView>
   );
 }
@@ -550,6 +563,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(10),
     borderRadius: moderateScale(20),
     width: horizontalScale(150)
+  },
+  pdfContainer: {
+    marginVertical: verticalScale(20),
+    alignItems: 'center',
+    backgroundColor: 'black',
+    paddingVertical: verticalScale(10),
+    paddingHorizontal: horizontalScale(10),
+    borderRadius: moderateScale(20),
   },
   head: { height: 40, backgroundColor: '#f1f8ff' },
   text: { margin: 6, color: "black" }
