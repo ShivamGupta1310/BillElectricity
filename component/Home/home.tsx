@@ -16,12 +16,10 @@ import {
 import CheckBox from 'react-native-check-box';
 //@ts-ignore
 import { Table, Row, Rows } from 'react-native-table-component';
-import PDFBill from '../pdfBill';
 import { horizontalScale, verticalScale, moderateScale } from '../../utilies/utilies';
 
 const Home = ({ navigation }) => {
   const [showTable, setShowTable] = useState(false);
-  const [path, setPath] = useState('');
   const [firstInclude, setFirstInclude] = useState(true);
   const [showFirst, setShowFirst] = useState(false);
   const [total, setTotal] = useState({
@@ -402,9 +400,13 @@ const Home = ({ navigation }) => {
     )
   }
 
-  const generatePDF = () => {
-    return <PDFBill />
+  const totalBill = () => {
+    const firstBill = Number(handleFirstCalculate().totalBillAmount);
+    const secondBill = Number(second.totalAmountDrink.toFixed(2));
+    const thirdBill = Number(third.totalAmountDrink.toFixed(2));
+    return (firstBill + secondBill + thirdBill)
   }
+
   return (
     <SafeAreaView style={styles.mainContainer}>
       <StatusBar
@@ -445,16 +447,17 @@ const Home = ({ navigation }) => {
             <Text style={{ color: "white" }}>Clear</Text>
           </TouchableOpacity>
         </View>
-        <CheckBox
-          onClick={() => {
-            setShowFirst(!showFirst)
-          }}
-          isChecked={showFirst}
-          leftText={"Show First Floor"}
-          leftTextStyle={styles.checkIcon}
-        />
+
         {showTable && (
           <>
+            <CheckBox
+              onClick={() => {
+                setShowFirst(!showFirst)
+              }}
+              isChecked={showFirst}
+              leftText={"Show First Floor"}
+              leftTextStyle={styles.checkIcon}
+            />
             <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
               <Row data={['', 'Unit used', 'TotalUnit', 'Total Bill', 'Drinking Pay', `Total Pay`]} style={styles.head} textStyle={styles.text} />
               <Rows data={[
@@ -463,10 +466,27 @@ const Home = ({ navigation }) => {
                 showFirst && ['First', ``, `${handleFirstCalculate().unitUsed}`, `${handleFirstCalculate().totalBill}`, `${((third.otherAmount - second.otherAmount).toFixed(2))}`, `${handleFirstCalculate().totalBillAmount}`],
               ]} textStyle={styles.text} />
               <Row data={[``, `Motor Unit: ${per.motor}`]} style={styles.head} textStyle={styles.text} />
-              <Row data={[``, `Per Unit : ${per.unit}`]} style={styles.head} textStyle={styles.text} />
-              <Row data={[``, `TotalBill : ${Math.floor(Number(handleFirstCalculate().totalBillAmount)) + Math.floor(second.totalAmountDrink) + Math.floor(third.totalAmountDrink)}`]} style={styles.head} textStyle={styles.text} />
+              <Row data={[``, `Per Unit: ${per.unit}`]} style={styles.head} textStyle={styles.text} />
+              <Row data={[``, `TotalBill: ${totalBill()}`]} style={styles.head} textStyle={styles.text} />
             </Table>
-            <TouchableOpacity style={styles.pdfContainer} onPress={() => navigation.navigate('Bill')}>
+            <TouchableOpacity style={styles.pdfContainer} onPress={() => {
+              navigation.navigate('Bill',
+                {
+                  totalUnit: total.unit,
+                  motorUnit: per.motor,
+                  perUnit: per.unit,
+                  third,
+                  second,
+                  first: {
+                    'totalUnit': handleFirstCalculate().unitUsed,
+                    'totalBill': handleFirstCalculate().totalBill,
+                    'drinking': (third.otherAmount - second.otherAmount).toFixed(2),
+                    'totalPay': handleFirstCalculate().totalBillAmount
+                  },
+                  motor,
+                  totalBill: totalBill()
+                })
+            }}>
               <Text style={{ color: "white" }}>PDF</Text>
             </TouchableOpacity>
           </>
@@ -474,7 +494,7 @@ const Home = ({ navigation }) => {
 
       </ScrollView>
 
-    </SafeAreaView>
+    </SafeAreaView >
   );
 }
 

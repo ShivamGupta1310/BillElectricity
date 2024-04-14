@@ -3,7 +3,6 @@ import {
     StyleSheet,
     Alert,
     View,
-    Button,
     TouchableOpacity,
     Image
 } from 'react-native';
@@ -12,11 +11,12 @@ import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import Share from 'react-native-share';
 //@ts-ignore
 import Pdf from 'react-native-pdf';
+import {dateFormat, invoiceDateFormat} from "../utilies/index"
 const goBack = require("../common/assets/goback.png");
 const share = require("../common/assets/share.png");
 const logo = require("../common/assets/logo.jpg");
 
-const PDFBill = ({ navigation }) => {
+const PDFBill = ({ route, navigation }) => {
     const [path, setPath] = useState('');
 
     useEffect(() => {
@@ -37,6 +37,7 @@ const PDFBill = ({ navigation }) => {
     };
 
     const htmlBody = () => {
+        const { totalUnit, motorUnit, perUnit, third, second, first, motor, totalBill } = route.params;
         return `<html>
         <head>
             <style>
@@ -86,13 +87,15 @@ const PDFBill = ({ navigation }) => {
                     <img src="https://thumbs2.imgbox.com/54/a4/e5BhPs1e_t.jpg" style="width:50px;height:50px;">
                     <h1>Electricity Invoice</h1>
                     <div style='display:flex; justify-content:space-between'>
-                        <p>Total Unit:1400</p>
-                        <p>Per Unit:1400</p>
-                        <p>Motor Unit:1400</p>
+                        <p>Total Unit:${totalUnit}</p>
+                        <p>Per Unit:₹ ${perUnit}</p>
+                        <p>Motor Unit:${motorUnit}</p>
                     </div>
                     <table style="width:100%">
                         <tr>
                             <th>Floor</th>
+                            <th>Current Unit</th>
+                            <th>Pervious Unit</th>
                             <th>Unit Used</th>
                             <th>Total Unit</th>
                             <th>Total Bill</th>
@@ -102,34 +105,50 @@ const PDFBill = ({ navigation }) => {
         
                         <tr>
                             <td>Third</td>
-                            <td>$10.00</td>
-                            <td>$10.00</td>
-                            <td>1</td>
-                            <td>$10.00</td>
-                            <td>$10.00</td>
+                            <td>${third.perviousUnit}</td>
+                            <td>${third.currentUnit}</td>
+                            <td>${third.perviousUnit - third.currentUnit}</td>
+                            <td>${third.totalUnit.toFixed(2)}</td>
+                            <td>${third.totalAmount}</td>
+                            <td>${third.otherFlag === 0 ? '+' : third.otherFlag === 1 ? '-' : ''} ${third.otherAmount.toFixed(2)}</td>
+                            <td>${third.totalAmountDrink.toFixed(2)}</td>
                         </tr>
                         <tr>
                             <td>Second</td>
-                            <td>${10}</td>
-                            <td>$10.00</td>
-                            <td>1</td>
-                            <td>$10.00</td>
-                            <td>$10.00</td>
+                            <td>${second.perviousUnit}</td>
+                            <td>${second.currentUnit}</td>
+                            <td>${second.perviousUnit - second.currentUnit}</td>
+                            <td>${second.totalUnit.toFixed(2)}</td>
+                            <td>${second.totalAmount}</td>
+                            <td>${second.otherFlag === 0 ? '+' : second.otherFlag === 1 ? '-' : ''} ${second.otherAmount.toFixed(2)}</td>
+                            <td>${second.totalAmountDrink.toFixed(2)}</td>
                         </tr>
                         <tr>
                             <td>First</td>
-                            <td>$10.00</td>
-                            <td>$10.00</td>
-                            <td>1</td>
-                            <td>$10.00</td>
-                            <td>$10.00</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>${first.totalUnit}</td>
+                            <td>${first.totalBill}</td>
+                            <td>${first.drinking}</td>
+                            <td>${first.totalPay}</td>
                         </tr>
+                        <tr>
+                        <td>Motor</td>
+                        <td>${motor.perviousUnit}</td>
+                            <td>${motor.currentUnit}</td>
+                            <td>${motor.perviousUnit - motor.currentUnit}</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
                         <tr class="total">
-                            <td colspan="5">Total</td>
-                            <td>$34.00</td>
+                            <td colspan="7">Total</td>
+                            <td>₹ ${totalBill}</td>
                         </tr>
                     </table>
-                    <p>Date: January 1, 2023</p>
+                    <p>Date: ${dateFormat()}</p>
                 </div>
             </center>
         </body>
@@ -137,7 +156,7 @@ const PDFBill = ({ navigation }) => {
             <div style=' padding: 0px 10px;'>
                 <div style='display:flex; justify-content: space-between'>
                     <p class="label">Developer By: Shivam Gupta, Vishal Gupta</h4>
-                    <p class="label">Manage By: Hetal Gupta, Vishal Gupta</h4>
+                    <p class="label">Manage By: Hetal Gupta</h4>
                 </div>
                 <div style='display:flex; justify-content: space-between'>
                     <p style='margin:0'><a href="tel:832-068-1757">Contact: +91 8320681757</a></p>
@@ -155,7 +174,7 @@ const PDFBill = ({ navigation }) => {
         try {
             let PDFOptions = {
                 html: htmlBody(),
-                fileName: 'test',
+                fileName: `invoice_${invoiceDateFormat()}`,
                 directory: 'Documents',
             };
             const file = await RNHTMLtoPDF.convert(PDFOptions);
