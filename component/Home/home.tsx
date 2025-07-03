@@ -24,7 +24,7 @@ const Home = ({ navigation }) => {
   const [path, setPath] = useState('');
   const [firstInclude, setFirstInclude] = useState(true);
   const [showFirst, setShowFirst] = useState(false);
-  const [total, setTotal] = useState({
+  const [total, setTotal] = useState({head
     bill: 0,
     unit: 0
   });
